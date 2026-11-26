@@ -80,6 +80,9 @@ WINDOWS_ATLMFC_MARKER = "# JSC2JS_OPTIONAL_ATLMFC"
 WINDOWS_UM_LIB_MARKER = "# JSC2JS_INSTALLED_SDK_UM_LIB"
 WINDOWS_VS_VERSION_MARKER = "# JSC2JS_HOSTED_VS_VERSION"
 
+# the CPU d8 is built for: x64 (default) or arm64 (for code caches from an arm64 embedder)
+TARGET_CPU = os.environ.get("JSC2JS_TARGET_CPU", "x64")
+
 def log(msg: str):
     print(f"[{datetime.utcnow().isoformat()}] {msg}")
 
@@ -989,7 +992,7 @@ def main():
                 # preset is just release+x64, so generate the same args directly.
                 work_dir.mkdir(parents=True, exist_ok=True)
                 (work_dir / "args.gn").write_text(
-                    'target_cpu = "x64"\n'
+                    f'target_cpu = "{TARGET_CPU}"\n'
                     "is_debug = false\n"
                     "is_component_build = false\n"
                     "symbol_level = 0\n"
@@ -1028,7 +1031,8 @@ def main():
 
             smoke_output = ""
             valid_cache_output = ""
-            if is_legacy or is_modern_semantic:
+            # the smoke tests run d8 on this host, which cannot run a d8 for another CPU
+            if (is_legacy or is_modern_semantic) and TARGET_CPU == "x64":
                 smoke_output = run_rejection_smoke(built_bin)
                 valid_cache = valid_cache_for_version(ver)
                 if valid_cache is not None:
