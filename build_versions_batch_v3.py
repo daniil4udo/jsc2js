@@ -993,7 +993,9 @@ def main():
                     "is_debug = false\n"
                     "is_component_build = false\n"
                     "symbol_level = 0\n"
-                    "v8_enable_disassembler = true\n"
+                    # extra gn args, ";"-separated (Node embedders: v8_enable_pointer_compression=false)
+                    + "".join(a.strip() + "\n" for a in os.environ.get("JSC2JS_EXTRA_GN_ARGS", "").split(";") if a.strip())
+                    + "v8_enable_disassembler = true\n"
                     + object_print_gn_arg(Path("v8"))
                     + linux_legacy_gn_args
                     + windows_warning_policy_gn_arg(Path("v8"))

@@ -13,6 +13,16 @@ on:
         required: false
         default: ""
         type: string
+      extra_gn_args:
+        description: "Extra gn args, ';'-separated (e.g. v8_enable_pointer_compression=false)"
+        required: false
+        default: ""
+        type: string
+      linux_only:
+        description: "Build only the Linux d8"
+        required: false
+        default: false
+        type: boolean
       audit_only:
         description: "Upload only validation records, not d8 binaries"
         required: false
@@ -39,8 +49,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022]
+        os: ${{ inputs.linux_only && fromJSON('["ubuntu-22.04"]') || fromJSON('["ubuntu-22.04","windows-2022"]') }}
     env:
+      JSC2JS_EXTRA_GN_ARGS: ${{ inputs.extra_gn_args }}
       ASSIGNED_JSON: ${{ inputs.versions_json || format('["{0}"]', inputs.version) }}
       DEPOT_TOOLS_WIN_TOOLCHAIN: "0"
       SKIP_BACKUP: "1"
